@@ -13,7 +13,7 @@ env:
 jobs:
   build-macos-silicon:
     name: Build macOS Silicon (${{ matrix.variant.name }})
-    runs-on: macos-latest
+    runs-on: macos-14
     timeout-minutes: 45
     strategy:
       fail-fast: false
@@ -58,8 +58,15 @@ jobs:
       - name: Rename binary
         run: |
           mkdir -p dist
-          mv dirsearch.bin dist/dirsearch-macos-silicon-${{ matrix.variant.name }}
-
+          if [ -f dirsearch ]; then
+            mv dirsearch dist/dirsearch-macos-silicon-${{ matrix.variant.name }}
+          elif [ -f dirsearch.bin ]; then
+            mv dirsearch.bin dist/dirsearch-macos-silicon-${{ matrix.variant.name }}
+          else
+            echo "Expected Nuitka output 'dirsearch' or 'dirsearch.bin' not found" >&2
+            ls -la
+            exit 1
+          fi
       - name: Test macOS Silicon binary
         run: |
           ./dist/dirsearch-macos-silicon-${{ matrix.variant.name }} --version

@@ -63,8 +63,15 @@ jobs:
       - name: Rename binary
         run: |
           mkdir -p dist
-          mv dirsearch.bin dist/dirsearch-linux-amd64-${{ matrix.variant.name }}
-
+          if [ -f dirsearch ]; then
+            mv dirsearch dist/dirsearch-linux-amd64-${{ matrix.variant.name }}
+          elif [ -f dirsearch.bin ]; then
+            mv dirsearch.bin dist/dirsearch-linux-amd64-${{ matrix.variant.name }}
+          else
+            echo "Expected Nuitka output 'dirsearch' or 'dirsearch.bin' not found" >&2
+            ls -la
+            exit 1
+          fi
       - name: Test Linux binary
         run: |
           ./dist/dirsearch-linux-amd64-${{ matrix.variant.name }} --version

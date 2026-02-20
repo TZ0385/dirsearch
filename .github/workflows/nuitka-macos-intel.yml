@@ -13,7 +13,7 @@ env:
 jobs:
   build-macos-intel:
     name: Build macOS Intel (${{ matrix.variant.name }})
-    runs-on: macos-13
+    runs-on: macos-15-large
     timeout-minutes: 45
     strategy:
       fail-fast: false
@@ -58,8 +58,15 @@ jobs:
       - name: Rename binary
         run: |
           mkdir -p dist
-          mv dirsearch.bin dist/dirsearch-macos-intel-${{ matrix.variant.name }}
-
+          if [ -f dirsearch ]; then
+            mv dirsearch dist/dirsearch-macos-intel-${{ matrix.variant.name }}
+          elif [ -f dirsearch.bin ]; then
+            mv dirsearch.bin dist/dirsearch-macos-intel-${{ matrix.variant.name }}
+          else
+            echo "Expected Nuitka output 'dirsearch' or 'dirsearch.bin' not found" >&2
+            ls -la
+            exit 1
+          fi
       - name: Test macOS Intel binary
         run: |
           ./dist/dirsearch-macos-intel-${{ matrix.variant.name }} --version
